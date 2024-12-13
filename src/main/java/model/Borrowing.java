@@ -23,5 +23,5 @@ public class Borrowing {
         this.status = status;
     }
 
-    // Getters và Setters
+    // Getters và Setters (nếu cần)
 }

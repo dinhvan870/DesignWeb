@@ -1,47 +1,38 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Danh sách Sách</title>
-    <style>
-        table {
-            border-collapse: collapse;
-            width: 80%;
-            margin: auto;
-        }
-        th, td {
-            border: 1px solid black;
-            text-align: center;
-            padding: 8px;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
+    <title>Book List</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <h1 style="text-align: center;">Danh sách Sách</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Tiêu đề</th>
-                <th>Tác giả</th>
-                <th>Năm xuất bản</th>
-                <th>Trạng thái</th>
-            </tr>
-        </thead>
-        <tbody>
-            <c:forEach var="book" items="${books}">
+    <div class="container">
+        <h1 class="mt-5">Book List</h1>
+        <table class="table table-striped mt-3">
+            <thead>
                 <tr>
-                    <td>${book.id}</td>
-                    <td>${book.title}</td>
-                    <td>${book.author}</td>
-                    <td>${book.publishedYear}</td>
-                    <td>${book.status}</td>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Published Year</th>
+                    <th>Status</th>	
                 </tr>
-            </c:forEach>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <c:forEach var="book" items="${books}">
+                    <tr>
+                        <td><c:out value="${book.id}" /></td>
+                        <td><c:out value="${book.title}" /></td>
+                        <td><c:out value="${book.author}" /></td>
+                        <td><c:out value="${book.publishedYear}" /></td>
+                        <td><c:out value="${book.status}" /></td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>

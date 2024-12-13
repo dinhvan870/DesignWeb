@@ -1,36 +1,47 @@
 package dao;
 
-import model.Book;
-import database.DBConnection;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import database.DBConnection;
+import model.Book;
+
 public class BookDAO {
-    private static final String URL = "jdbc:mysql://localhost:3306/LibraryDB"; // Thay với tên schema
-    private static final String USER = "root";  // Thay bằng user của bạn
-    private static final String PASSWORD = "12345678";  // Thay bằng password của bạn
-
-    public List<Book> getAllBooks() {
+    public List<Book> getAllBooks() throws SQLException {
         List<Book> books = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            String query = "SELECT * FROM Books";
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
-
-            while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String title = resultSet.getString("title");
-                String author = resultSet.getString("author");
-                int publishedYear = resultSet.getInt("published_year");
-                String status = resultSet.getString("status");
-
-                books.add(new Book(id, title, author, publishedYear, status));
+        String sql = "SELECT * FROM Books";
+        
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
+            while (rs.next()) {
+                Book book = new Book(
+                    rs.getInt("id"),
+                    rs.getString("title"),
+                    rs.getString("author"),
+                    rs.getInt("published_year"),
+                    rs.getString("status")
+                );
+                books.add(book);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return books;
+    }
+    
+    public int getTotalBooks() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM books";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        }
+        return 0;
     }
 }

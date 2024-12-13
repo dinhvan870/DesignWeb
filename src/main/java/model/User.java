@@ -1,6 +1,6 @@
 package model;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 
 public class User {
     private int id;
@@ -17,5 +17,5 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    // Getters và Setters
+    // Getters và Setters (nếu cần)
 }

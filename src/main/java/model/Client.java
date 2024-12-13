@@ -25,5 +25,5 @@ public class Client {
         this.deliveryMethod = deliveryMethod;
     }
 
-    // Getters và Setters
+    // Getters và Setters (nếu cần)
 }
