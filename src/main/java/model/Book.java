@@ -7,7 +7,8 @@ public class Book {
     private int publishedYear;
     private String status;
 
-    // Constructor
+    public Book() {}
+
     public Book(int id, String title, String author, int publishedYear, String status) {
         this.id = id;
         this.title = title;
