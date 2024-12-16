@@ -1,36 +1,86 @@
 package dao;
 
-import model.Book;
-import database.DBConnection;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import database.DBConnection;
+import model.Book;
+
 public class BookDAO {
-    private static final String URL = "jdbc:mysql://localhost:3306/LibraryDB"; // Thay với tên schema
-    private static final String USER = "root";  // Thay bằng user của bạn
-    private static final String PASSWORD = "12345678";  // Thay bằng password của bạn
-
-    public List<Book> getAllBooks() {
+    
+    public List<Book> getAllBooks() throws SQLException {
         List<Book> books = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            String query = "SELECT * FROM Books";
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(query);
-
-            while (resultSet.next()) {
-                int id = resultSet.getInt("id");
-                String title = resultSet.getString("title");
-                String author = resultSet.getString("author");
-                int publishedYear = resultSet.getInt("published_year");
-                String status = resultSet.getString("status");
-
-                books.add(new Book(id, title, author, publishedYear, status));
+        String sql = "SELECT * FROM Books";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                books.add(extractBookFromResultSet(rs));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return books;
+    }
+
+    public Book getBookById(int id) throws SQLException {
+        String sql = "SELECT * FROM Books WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return extractBookFromResultSet(rs);
+                }
+            }
+        }
+        return null;
+    }
+
+    public void addBook(Book book) throws SQLException {
+        String sql = "INSERT INTO Books (title, author, published_year, status) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, book.getTitle());
+            pstmt.setString(2, book.getAuthor());
+            pstmt.setInt(3, book.getPublishedYear());
+            pstmt.setString(4, book.getStatus());
+            pstmt.executeUpdate();
+        }
+    }
+
+    public void updateBook(Book book) throws SQLException {
+        String sql = "UPDATE Books SET title = ?, author = ?, published_year = ?, status = ? WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, book.getTitle());
+            pstmt.setString(2, book.getAuthor());
+            pstmt.setInt(3, book.getPublishedYear());
+            pstmt.setString(4, book.getStatus());
+            pstmt.setInt(5, book.getId());
+            pstmt.executeUpdate();
+        }
+    }
+
+    public void deleteBook(int id) throws SQLException {
+        String sql = "DELETE FROM Books WHERE id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+        }
+    }
+
+    private Book extractBookFromResultSet(ResultSet rs) throws SQLException {
+        return new Book(
+            rs.getInt("id"),
+            rs.getString("title"),
+            rs.getString("author"),
+            rs.getInt("published_year"),
+            rs.getString("status")
+        );
     }
 }
