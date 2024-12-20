@@ -1,10 +1,12 @@
 package dao;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,6 +82,32 @@ public class BorrowingDAO {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, id);
             pstmt.executeUpdate();
+        }
+    }
+    
+    
+    public static boolean addBorrowing(int bookId, int userId) throws SQLException {
+        String sql = "INSERT INTO Borrowings (book_id, user_id, borrow_date, status) VALUES (?, ?, ?, 'Borrowed')";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, bookId);
+            pstmt.setInt(2, userId);
+            pstmt.setDate(3, Date.valueOf(LocalDate.now()));
+            
+            int affectedRows = pstmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                // Update book status
+                String updateBookSql = "UPDATE Books SET status = 'Borrowed' WHERE id = ?";
+                try (PreparedStatement updateStmt = conn.prepareStatement(updateBookSql)) {
+                    updateStmt.setInt(1, bookId);
+                    updateStmt.executeUpdate();
+                }
+                return true;
+            }
+            return false;
         }
     }
 

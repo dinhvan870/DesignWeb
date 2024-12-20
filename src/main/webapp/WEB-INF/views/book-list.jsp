@@ -27,12 +27,6 @@
         .btn-primary:hover {
             background-color: #0056b3;
         }
-        .book-cover {
-            width: 50px;
-            height: 75px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
     </style>
 </head>
 <body>
@@ -74,11 +68,24 @@
         
         <div class="card">
             <div class="card-body">
+                <form action="dashboard" method="get" class="mb-4">
+                    <input type="hidden" name="action" value="books">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search books..." name="search" value="${param.search}">
+                        <button class="btn btn-outline-secondary" type="submit">Search</button>
+                    </div>
+                </form>
+
+                <c:if test="${empty books}">
+                    <div class="alert alert-info" role="alert">
+                        No books found. Please try a different search term.
+                    </div>
+                </c:if>
+
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Cover</th>
                                 <th>Title</th>
                                 <th>Author</th>
                                 <th>Published Year</th>
@@ -89,9 +96,6 @@
                         <tbody>
                             <c:forEach var="book" items="${books}">
                                 <tr>
-                                    <td>
-                                        <img src="https://via.placeholder.com/50x75" alt="Book Cover" class="book-cover">
-                                    </td>
                                     <td>${book.title}</td>
                                     <td>${book.author}</td>
                                     <td>${book.publishedYear}</td>

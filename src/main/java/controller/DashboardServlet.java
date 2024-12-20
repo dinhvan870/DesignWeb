@@ -138,7 +138,13 @@ public class DashboardServlet extends HttpServlet {
 
     private void listBooks(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
-        List<Book> books = bookDAO.getAllBooks();
+        String search = request.getParameter("search");
+        List<Book> books;
+        if (search != null && !search.trim().isEmpty()) {
+            books = bookDAO.searchBooks(search);
+        } else {
+            books = bookDAO.getAllBooks();
+        }
         request.setAttribute("books", books);
         request.getRequestDispatcher("/WEB-INF/views/book-list.jsp").forward(request, response);
     }
@@ -153,7 +159,11 @@ public class DashboardServlet extends HttpServlet {
     private void listBorrowings(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, ServletException, IOException {
         List<Borrowing> borrowings = borrowingDAO.getAllBorrowings();
+        List<Book> availableBooks = bookDAO.getAvailableBooks();
+        List<User> users = userDAO.getAllUsers();
         request.setAttribute("borrowings", borrowings);
+        request.setAttribute("availableBooks", availableBooks);
+        request.setAttribute("users", users);
         request.getRequestDispatcher("/WEB-INF/views/borrowing-list.jsp").forward(request, response);
     }
 
@@ -202,6 +212,7 @@ public class DashboardServlet extends HttpServlet {
         String role = request.getParameter("role");
         User newUser = new User(0, username, password, fullName, role, null);
         userDAO.addUser(newUser);
+        request.getSession().setAttribute("message", "User added successfully.");
         response.sendRedirect("dashboard?action=users");
     }
 
@@ -209,18 +220,23 @@ public class DashboardServlet extends HttpServlet {
             throws SQLException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         String username = request.getParameter("username");
-        String password = request.getParameter("password");
         String fullName = request.getParameter("fullName");
         String role = request.getParameter("role");
-        User user = new User(id, username, password, fullName, role, null);
+        User user = new User(id, username, null, fullName, role, null);
         userDAO.updateUser(user);
+        request.getSession().setAttribute("message", "User updated successfully.");
         response.sendRedirect("dashboard?action=users");
     }
 
     private void deleteUser(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        userDAO.deleteUser(id);
+        try {
+            userDAO.deleteUser(id);
+            request.getSession().setAttribute("message", "User deleted successfully.");
+        } catch (SQLException e) {
+            request.getSession().setAttribute("error", "Error deleting user. They may have associated records.");
+        }
         response.sendRedirect("dashboard?action=users");
     }
 
@@ -233,19 +249,22 @@ public class DashboardServlet extends HttpServlet {
         String status = request.getParameter("status");
         Borrowing newBorrowing = new Borrowing(0, bookId, userId, borrowDate, returnDate, status, null, null);
         borrowingDAO.addBorrowing(newBorrowing);
+        request.getSession().setAttribute("message", "Borrowing added successfully.");
         response.sendRedirect("dashboard?action=borrowings");
     }
 
     private void updateBorrowing(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        int bookId = Integer.parseInt(request.getParameter("bookId"));
-        int userId = Integer.parseInt(request.getParameter("userId"));
         java.sql.Date borrowDate = java.sql.Date.valueOf(request.getParameter("borrowDate"));
         java.sql.Date returnDate = java.sql.Date.valueOf(request.getParameter("returnDate"));
         String status = request.getParameter("status");
-        Borrowing borrowing = new Borrowing(id, bookId, userId, borrowDate, returnDate, status, null, null);
+        Borrowing borrowing = borrowingDAO.getBorrowingById(id);
+        borrowing.setBorrowDate(borrowDate);
+        borrowing.setReturnDate(returnDate);
+        borrowing.setStatus(status);
         borrowingDAO.updateBorrowing(borrowing);
+        request.getSession().setAttribute("message", "Borrowing updated successfully.");
         response.sendRedirect("dashboard?action=borrowings");
     }
 
@@ -253,6 +272,7 @@ public class DashboardServlet extends HttpServlet {
             throws SQLException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         borrowingDAO.deleteBorrowing(id);
+        request.getSession().setAttribute("message", "Borrowing deleted successfully.");
         response.sendRedirect("dashboard?action=borrowings");
     }
 
@@ -268,6 +288,7 @@ public class DashboardServlet extends HttpServlet {
         String deliveryMethod = request.getParameter("deliveryMethod");
         Client newClient = new Client(0, email, fullName, birthDate, address, city, gender, occupation, deliveryMethod);
         clientDAO.addClient(newClient);
+        request.getSession().setAttribute("message", "Client added successfully.");
         response.sendRedirect("dashboard?action=clients");
     }
 
@@ -284,6 +305,7 @@ public class DashboardServlet extends HttpServlet {
         String deliveryMethod = request.getParameter("deliveryMethod");
         Client client = new Client(id, email, fullName, birthDate, address, city, gender, occupation, deliveryMethod);
         clientDAO.updateClient(client);
+        request.getSession().setAttribute("message", "Client updated successfully.");
         response.sendRedirect("dashboard?action=clients");
     }
 
@@ -291,6 +313,7 @@ public class DashboardServlet extends HttpServlet {
             throws SQLException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         clientDAO.deleteClient(id);
+        request.getSession().setAttribute("message", "Client deleted successfully.");
         response.sendRedirect("dashboard?action=clients");
     }
 }
