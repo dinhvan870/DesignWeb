@@ -10,31 +10,32 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        body {
+        .btn-edit {
+            color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .btn-edit:hover {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .btn-delete {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-delete:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+        .table th {
             background-color: #f8f9fa;
-        }
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-        }
-        .table {
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
-        }
-        .btn-primary {
-            background-color: #007bff;
-            border: none;
-        }
-        .btn-primary:hover {
-            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
+        <div class="container-fluid">
             <a class="navbar-brand" href="#"><i class="fas fa-book-reader"></i> Library Management System</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -92,10 +93,10 @@
                                     <td><fmt:formatDate value="${borrowing.returnDate}" pattern="yyyy-MM-dd" /></td>
                                     <td><span class="badge bg-${borrowing.status == 'Returned' ? 'success' : 'warning'}">${borrowing.status}</span></td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editBorrowingModal${borrowing.id}">
+                                        <button class="btn btn-sm btn-edit" onclick="editBorrowing(${borrowing.id}, '${borrowing.bookTitle}', '${borrowing.userName}', '${borrowing.borrowDate}', '${borrowing.returnDate}', '${borrowing.status}')">
                                             <i class="fas fa-edit"></i> Edit
                                         </button>
-                                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteBorrowingModal${borrowing.id}">
+                                        <button class="btn btn-sm btn-delete" onclick="deleteBorrowing(${borrowing.id}, '${borrowing.bookTitle}')">
                                             <i class="fas fa-trash"></i> Delete
                                         </button>
                                     </td>
@@ -109,18 +110,19 @@
     </div>
 
     <!-- Add Borrowing Modal -->
-    <div class="modal fade" id="addBorrowingModal" tabindex="-1" aria-labelledby="addBorrowingModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addBorrowingModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addBorrowingModalLabel">Add New Borrowing</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">Add New Borrowing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <form>
+                <form action="dashboard" method="post" id="addBorrowingForm">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="addBorrowing">
                         <div class="mb-3">
                             <label for="bookId" class="form-label">Book</label>
-                            <select class="form-select" id="bookId" required>
+                            <select class="form-select" id="bookId" name="bookId" required>
                                 <c:forEach var="book" items="${availableBooks}">
                                     <option value="${book.id}">${book.title}</option>
                                 </c:forEach>
@@ -128,7 +130,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="userId" class="form-label">User</label>
-                            <select class="form-select" id="userId" required>
+                            <select class="form-select" id="userId" name="userId" required>
                                 <c:forEach var="user" items="${users}">
                                     <option value="${user.id}">${user.fullName}</option>
                                 </c:forEach>
@@ -136,25 +138,114 @@
                         </div>
                         <div class="mb-3">
                             <label for="borrowDate" class="form-label">Borrow Date</label>
-                            <input type="date" class="form-control" id="borrowDate" required>
+                            <input type="date" class="form-control" id="borrowDate" name="borrowDate" required>
                         </div>
                         <div class="mb-3">
                             <label for="returnDate" class="form-label">Return Date</label>
-                            <input type="date" class="form-control" id="returnDate" required>
+                            <input type="date" class="form-control" id="returnDate" name="returnDate" required>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Add Borrowing</button>
-                </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="Borrowed">Borrowed</option>
+                                <option value="Returned">Returned</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Borrowing</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- Edit and Delete modals would be similar to the Add Borrowing modal, but with pre-filled data and different actions -->
+    <!-- Edit Borrowing Modal -->
+    <div class="modal fade" id="editBorrowingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Borrowing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="dashboard" method="post" id="editBorrowingForm">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="updateBorrowing">
+                        <input type="hidden" name="id" id="editBorrowingId">
+                        <div class="mb-3">
+                            <label for="editBookTitle" class="form-label">Book Title</label>
+                            <input type="text" class="form-control" id="editBookTitle" name="bookTitle" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editUserName" class="form-label">User Name</label>
+                            <input type="text" class="form-control" id="editUserName" name="userName" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editBorrowDate" class="form-label">Borrow Date</label>
+                            <input type="date" class="form-control" id="editBorrowDate" name="borrowDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editReturnDate" class="form-label">Return Date</label>
+                            <input type="date" class="form-control" id="editReturnDate" name="returnDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editStatus" class="form-label">Status</label>
+                            <select class="form-select" id="editStatus" name="status" required>
+                                <option value="Borrowed">Borrowed</option>
+                                <option value="Returned">Returned</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Update Borrowing</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Borrowing Modal -->
+    <div class="modal fade" id="deleteBorrowingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Borrowing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="dashboard" method="post" id="deleteBorrowingForm">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="deleteBorrowing">
+                        <input type="hidden" name="id" id="deleteBorrowingId">
+                        <p>Are you sure you want to delete the borrowing for "<span id="deleteBorrowingBook"></span>"?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function editBorrowing(id, bookTitle, userName, borrowDate, returnDate, status) {
+            document.getElementById('editBorrowingId').value = id;
+            document.getElementById('editBookTitle').value = bookTitle;
+            document.getElementById('editUserName').value = userName;
+            document.getElementById('editBorrowDate').value = borrowDate;
+            document.getElementById('editReturnDate').value = returnDate;
+            document.getElementById('editStatus').value = status;
+            new bootstrap.Modal(document.getElementById('editBorrowingModal')).show();
+        }
+
+        function deleteBorrowing(id, bookTitle) {
+            document.getElementById('deleteBorrowingId').value = id;
+            document.getElementById('deleteBorrowingBook').textContent = bookTitle;
+            new bootstrap.Modal(document.getElementById('deleteBorrowingModal')).show();
+        }
+    </script>
 </body>
 </html>
-
