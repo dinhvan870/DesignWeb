@@ -230,9 +230,10 @@ public class DashboardServlet extends HttpServlet {
 
     private void deleteUser(HttpServletRequest request, HttpServletResponse response)
             throws SQLException, IOException {
-        int id = Integer.parseInt(request.getParameter("id"));
+        int userId = Integer.parseInt(request.getParameter("id"));
         try {
-            userDAO.deleteUser(id);
+            borrowingDAO.deleteAllBorrowingByUserId(userId);
+            userDAO.deleteUser(userId);
             request.getSession().setAttribute("message", "User deleted successfully.");
         } catch (SQLException e) {
             request.getSession().setAttribute("error", "Error deleting user. They may have associated records.");

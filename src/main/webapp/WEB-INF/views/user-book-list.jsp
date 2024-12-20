@@ -168,41 +168,45 @@
             
             function showToast(message, type = 'success') {
                 const toastContainer = document.querySelector('.toast-container');
-                const toastHtml = `
+                var toastHtml = `
                     <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
-                        <div class="toast-header bg-${type} text-white">
+                        <div class="toast-header bg-success text-white">
                             <strong class="me-auto">Library System</strong>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
                         </div>
                         <div class="toast-body">
-                            ${message}
+                            Undefined message
                         </div>
                     </div>
                 `;
+                toastHtml = toastHtml.replace(/Undefined message/g, message);
+                toastHtml = toastHtml.replace(/bg-success/g, 'bg-'+type);
                 toastContainer.innerHTML = toastHtml;
-                
+
                 setTimeout(() => {
                     const toast = document.querySelector('.toast');
                     if (toast) {
                         toast.remove();
                     }
-                }, 5000);
+                }, 3000);
             }
 
             borrowButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    const bookId = this.getAttribute('data-book-id');
-                    const row = this.closest('tr');
+                	const bookId = this.getAttribute('data-book-id');
 
-                    fetch('${pageContext.request.contextPath}/user?action=borrow', {
+                    const row = this.closest('tr');
+                    const formData = new FormData();
+                    formData.append('bookId', bookId);
+                    formData.append('action', 'borrow');
+
+                    fetch(`${pageContext.request.contextPath}/user?action=borrow`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: `bookId=${bookId}&action=borrow`
+                        body: formData
                     })
                     .then(response => response.text())
                     .then(data => {
+                    	
                         showToast(data);
                         row.remove(); // Remove the book from the list
                     })

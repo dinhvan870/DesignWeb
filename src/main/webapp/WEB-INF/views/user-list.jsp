@@ -133,7 +133,7 @@
                         <div class="mb-3">
                             <label for="role" class="form-label">Role</label>
                             <select class="form-select" id="role" name="role" required>
-                                <option value="User">User</option>
+                                <option value="Member">Member</option>
                                 <option value="Admin">Admin</option>
                             </select>
                         </div>
@@ -170,7 +170,7 @@
                         <div class="mb-3">
                             <label for="editRole" class="form-label">Role</label>
                             <select class="form-select" id="editRole" name="role" required>
-                                <option value="User">User</option>
+                                <option value="Member">Member</option>
                                 <option value="Admin">Admin</option>
                             </select>
                         </div>
