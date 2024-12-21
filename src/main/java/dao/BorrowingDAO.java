@@ -123,4 +123,13 @@ public class BorrowingDAO {
         borrowing.setUserName(rs.getString("user_name"));
         return borrowing;
     }
+    
+    public void deleteAllBorrowingByUserId(int userId) throws SQLException {
+        String sql = "DELETE FROM Borrowings WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            pstmt.executeUpdate();
+        }
+    }
 }

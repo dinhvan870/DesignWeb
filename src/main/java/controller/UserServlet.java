@@ -3,11 +3,13 @@ package controller;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 import dao.BookDAO;
 import dao.BorrowingDAO;
 import dao.UserDAO;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,6 +20,7 @@ import model.Client;
 import model.User;
 
 @WebServlet("/user")
+@MultipartConfig
 public class UserServlet extends HttpServlet {
     /**
      * 
@@ -69,7 +72,7 @@ public class UserServlet extends HttpServlet {
 
     private void handleBorrow(HttpServletRequest request, HttpServletResponse response) 
             throws IOException {
-        int bookId = Integer.parseInt(request.getParameter("bookId"));
+        int bookId =  Integer.parseInt(request.getParameter("bookId"));
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
         
